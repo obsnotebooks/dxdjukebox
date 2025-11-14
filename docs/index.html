@@ -1,0 +1,104 @@
+<!doctype html>
+<notebook theme="air">
+  <title>Untitled</title>
+  <script id="8" type="text/html" pinned="">
+    <div style="background-color:black;color:white;width:100vw;height:56.25vw;">
+      <iframe src=""></iframe>
+      <div>
+    </div>
+    <style>
+      iframe {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </script>
+  <script id="1" type="text/markdown">
+    # DxD Jukebox Notebook
+  </script>
+  <script id="2" type="module">
+    // JSON data that updates reactively based on inputs
+    const jsonData = {
+      "data": {
+        "title": titleInput,
+        "URL": urlInput,
+        "author": authorInput,
+        "date": dateInput,
+        "media": mediaInput,
+        "URLtext": urlTextInput
+      }
+    };
+
+    // API endpoint
+    const apiUrl = "https://api-playgrounds.screencloudapps.com/data/ca6ddc8c-6525-4927-b434-3b341b3a8a70/59651826-7335-4f11-84b2-6e7d3ebef461/1942a1cb-75a8-4e52-8ada-9dd22d3f5049"; // "https://api-playgrounds.screencloudapps.com/data/ca6ddc8c-6525-4927-b434-3b341b3a8a70/23627757-7010-44d1-ad33-f7a96a3c8f86/1b2813de-e7bb-48da-8439-28979e385ea3";
+
+    // Function to PUT JSON data
+    async function putJsonData(url, data) {
+      try {
+        const response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.text();
+        return result;
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    }
+  </script>
+  <script id="15" type="module" pinned="">
+    async function putDataIntoDisplay(jsonData) {
+      // Get the iframe element
+      const iframe = document.querySelector('iframe');
+
+      // Set the src attribute to the URL from jsonData
+      if (iframe && jsonData.data.URL) {
+        iframe.src = jsonData.data.URL;
+        return "Done."
+      }
+    }
+  </script>
+  <script id="6" type="module">
+    // Input form for JSON data using view() for reactivity
+    const titleInput = view(Inputs.text({label: "Title", value: "Reading"}));
+    const urlInput = view(Inputs.text({label: "URL", value: "https://shi.programmatology.com/reading"}));
+    const authorInput = view(Inputs.text({label: "Author", value: "John Cayley"}));
+    const dateInput = view(Inputs.text({label: "Date", value: "2025"}));
+    const mediaInput = view(Inputs.text({label: "Media", value: ""}));
+    const urlTextInput = view(Inputs.text({label: "URL Text", value: "shi.programmatology.com/reading"}));
+  </script>
+  <script id="7" type="text/x-typescript" pinned="">
+    jsonData.data.media
+  </script>
+  <script id="4" type="module" pinned="">
+    // Button to execute the PUT request
+    const button = htl.html`<button onclick=${async () => {
+      try {
+        button.disabled = true;
+        button.textContent = 'Sending...';
+
+        const result = await putDataIntoDisplay(jsonData);
+        display(`Gave iframe the URL. Response: ${result}`);
+
+        button.textContent = 'Send PUT Request';
+        button.disabled = false;
+      } catch (error) {
+        display(`Error: ${error.message}`);
+        button.textContent = 'Send PUT Request';
+        button.disabled = false;
+      }
+    }}>Send PUT Request</button>`;
+
+    display(button);
+
+  </script>
+</notebook>
