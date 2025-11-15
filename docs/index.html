@@ -21,6 +21,31 @@
   <script id="21" type="text/html">
     <button id="updateButton">Update iframe</button>
   </script>
+  <script id="26" type="module" pinned="">
+    // Initialize display immediately when this cell runs
+    (async function initializeDisplay() {
+      try {
+        // Wait a brief moment to ensure DOM elements are ready
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Create the item data object with current input values
+        const initialItemData = {
+          "title": titleInput,
+          "URL": urlInput,
+          "author": authorInput,
+          "date": dateInput,
+          "media": mediaInput,
+          "URLtext": urlTextInput
+        };
+
+        await putDataIntoDisplay(initialItemData);
+        console.log('Initialized iframe and caption');
+        display('Initialized iframe and caption');
+      } catch (error) {
+        display(`Error initializing display: ${error.message}`);
+      }
+    })();
+  </script>
   <script id="4" type="module" pinned="">
     // Button logic for updating iframe
     const updateButton = document.getElementById('updateButton');
@@ -51,9 +76,6 @@
         updateButton.disabled = false;
       }
     });
-  </script>
-  <script id="1" type="text/markdown">
-    # DxD Jukebox Notebook
   </script>
   <script id="2" type="module" pinned="">
     // JSON data that updates reactively based on inputs
