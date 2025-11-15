@@ -2,72 +2,91 @@
 <notebook theme="air">
   <title>DxD Jukebox</title>
   <script id="8" type="text/html" pinned="">
-    <div style="background-color:black;color:white;width:100vw;height:56.25vw;">
-      <iframe src=""></iframe>
-      <div>
+    <div style="position:relative;background-color:black;color:white;width:100vw;height:56.25vw;">
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;">
+        <iframe></iframe>
+      </div>
+      <div style="position:absolute;top:51.25vw;left:0;height:5vw;width:100%;background-color:rgb(78, 54, 41);display: flex;align-items:center;justify-content:center;font-size: 2vw;">
+        <span id="caption"></span>
+      </div>
     </div>
     <style>
       iframe {
+        border: none;
         width: 100%;
         height: 100%;
       }
     </style>
   </script>
+  <script id="21" type="text/html">
+    <button id="updateButton">Update iframe</button>
+  </script>
+  <script id="4" type="module" pinned="">
+    // Button logic for updating iframe
+    const updateButton = document.getElementById('updateButton');
+
+    updateButton.addEventListener('click', async () => {
+      try {
+        updateButton.disabled = true;
+        updateButton.textContent = 'Sending...';
+
+        // Create the item data object directly here to ensure it's available
+        const currentItemData = {
+          "title": titleInput,
+          "URL": urlInput,
+          "author": authorInput,
+          "date": dateInput,
+          "media": mediaInput,
+          "URLtext": urlTextInput
+        };
+
+        await putDataIntoDisplay(currentItemData);
+        display('Successfully updated iframe and caption');
+
+        updateButton.textContent = 'Update iframe';
+        updateButton.disabled = false;
+      } catch (error) {
+        display(`Error: ${error.message}`);
+        updateButton.textContent = 'Update iframe';
+        updateButton.disabled = false;
+      }
+    });
+  </script>
   <script id="1" type="text/markdown">
     # DxD Jukebox Notebook
   </script>
-  <script id="2" type="module">
+  <script id="2" type="module" pinned="">
     // JSON data that updates reactively based on inputs
-    const jsonData = {
-      "data": {
-        "title": titleInput,
-        "URL": urlInput,
-        "author": authorInput,
-        "date": dateInput,
-        "media": mediaInput,
-        "URLtext": urlTextInput
-      }
+    const itemData = {
+      "title": titleInput,
+      "URL": urlInput,
+      "author": authorInput,
+      "date": dateInput,
+      "media": mediaInput,
+      "URLtext": urlTextInput
     };
-
-    // API endpoint
-    const apiUrl = "https://api-playgrounds.screencloudapps.com/data/ca6ddc8c-6525-4927-b434-3b341b3a8a70/59651826-7335-4f11-84b2-6e7d3ebef461/1942a1cb-75a8-4e52-8ada-9dd22d3f5049"; // "https://api-playgrounds.screencloudapps.com/data/ca6ddc8c-6525-4927-b434-3b341b3a8a70/23627757-7010-44d1-ad33-f7a96a3c8f86/1b2813de-e7bb-48da-8439-28979e385ea3";
-
-    // Function to PUT JSON data
-    async function putJsonData(url, data) {
-      try {
-        const response = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data)
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.text();
-        return result;
-      } catch (error) {
-        console.error('Error:', error);
-        throw error;
-      }
-    }
+    display(itemData);
   </script>
   <script id="15" type="module" pinned="">
-    async function putDataIntoDisplay(jsonData) {
+    async function putDataIntoDisplay(itemData) {
       // Get the iframe element
       const iframe = document.querySelector('iframe');
 
-      // Set the src attribute to the URL from jsonData
-      if (iframe && jsonData.data.URL) {
-        iframe.src = jsonData.data.URL;
+      // Set the src attribute to the URL from itemData
+      if (iframe && itemData.URL) {
+        iframe.src = itemData.URL;
+        let elem = document.getElementById("caption");
+        let title = itemData.title ? "<cite>" + itemData.title + "</cite> &nbsp; " : "";
+        let author = itemData.author ? "by " + itemData.author + " &nbsp; " : "";
+        let date = itemData.date ? "(" + itemData.date + ") &nbsp; " : "";
+        let media = itemData.media ? "(" + itemData.media + ") &nbsp; " : "";
+        let urlText = itemData.URLtext ? itemData.URLtext : "";
+        elem.innerHTML = title + author + date + media + urlText;
         return "Done."
       }
     }
   </script>
-  <script id="6" type="module">
+  <script id="6" type="module" pinned="">
     // Input form for JSON data using view() for reactivity
     const titleInput = view(Inputs.text({label: "Title", value: "Reading"}));
     const urlInput = view(Inputs.text({label: "URL", value: "https://shi.programmatology.com/reading"}));
@@ -76,29 +95,46 @@
     const mediaInput = view(Inputs.text({label: "Media", value: ""}));
     const urlTextInput = view(Inputs.text({label: "URL Text", value: "shi.programmatology.com/reading"}));
   </script>
-  <script id="7" type="text/x-typescript" pinned="">
-    jsonData.data.media
+  <script id="17" type="text/html" pinned="">
+    <button id="addButton">Add to Array</button>
   </script>
-  <script id="4" type="module" pinned="">
-    // Button to execute the PUT request
-    const button = htl.html`<button onclick=${async () => {
+  <script id="20" type="module" pinned="">
+    // Button logic for adding current inputs to the array
+    const addButton = document.getElementById('addButton');
+
+    // Use a mutable value that persists across cell re-evaluations
+    // Only initialize if it doesn't exist
+    if (!window.itemsArrayGenerator) {
+      window.itemsArrayGenerator = Inputs.input([]);
+    }
+
+    addButton.addEventListener('click', async () => {
       try {
-        button.disabled = true;
-        button.textContent = 'Sending...';
+        addButton.disabled = true;
+        addButton.textContent = 'Adding...';
 
-        const result = await putDataIntoDisplay(jsonData);
-        display(`Gave iframe the URL. Response: ${result}`);
+        // Get current array value and add new item
+        const currentArray = window.itemsArrayGenerator.value;
+        const newArray = [...currentArray, {...itemData}];
 
-        button.textContent = 'Send PUT Request';
-        button.disabled = false;
+        // Update the input value to trigger reactivity
+        window.itemsArrayGenerator.value = newArray;
+        window.itemsArrayGenerator.dispatchEvent(new Event('input'));
+
+        addButton.textContent = 'Add to Array';
+        addButton.disabled = false;
       } catch (error) {
         display(`Error: ${error.message}`);
-        button.textContent = 'Send PUT Request';
-        button.disabled = false;
+        addButton.textContent = 'Add to Array';
+        addButton.disabled = false;
       }
-    }}>Send PUT Request</button>`;
+    });
 
-    display(button);
-
+    // Create a reactive view of the array
+    const itemsArray = view(window.itemsArrayGenerator);
+    display(itemsArray);
+  </script>
+  <script id="25" type="text/x-typescript" pinned="">
+    itemsArray
   </script>
 </notebook>
